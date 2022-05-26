@@ -261,7 +261,9 @@ public class SwerveDrivetrain extends SubsystemBase {
   }
 
   public void resetSimOdometry(Pose2d pose) {
+    simulationData.setHeading(pose.getRotation().getRadians());
     simOdometry.resetPosition(pose, new Rotation2d(simulationData.getHeading()));
+    stopModules();
   }
 
   public Field2d getField() {

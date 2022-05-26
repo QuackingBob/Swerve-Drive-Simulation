@@ -41,7 +41,7 @@ public class RobotContainer {
     swerveDrivetrain.setDefaultCommand(new SwerveJoystickCommand(
       swerveDrivetrain, 
       () -> -driveJoystick.getRawAxis(Constants.SwerveDrivetrain.kDriveXAxis), 
-      () -> driveJoystick.getRawAxis(Constants.SwerveDrivetrain.kDriveYAxis), 
+      () -> -driveJoystick.getRawAxis(Constants.SwerveDrivetrain.kDriveYAxis), 
       () -> -driveJoystick.getRawAxis(Constants.SwerveDrivetrain.kDriveWAxis), 
       () -> !driveJoystick.getRawButton(Constants.SwerveDrivetrain.kDriveFieldOrientButtonIdx)));
 

@@ -43,7 +43,7 @@ public class SwerveJoystickCommand extends CommandBase {
   @Override
   public void execute() {
     double vX = xSpeedFunc.get();
-    double vY = -ySpeedFunc.get();
+    double vY = ySpeedFunc.get();
     double vW = turnSpeedFunc.get();
 
     // apply deadband

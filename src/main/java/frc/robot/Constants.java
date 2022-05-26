@@ -80,12 +80,12 @@ public final class Constants {
         public static final double kWheelNonlinearity = 0.05;
         public static final double kMaxSpeedMPS = 5;
         public static final double kDriveMaxAcceleration = 3;
-        public static final double kTurnMaxAcceleration = 4;
+        public static final double kTurnMaxAcceleration = 2*Math.PI;
         public static final double kDriveMaxSpeedMPS = 5;
         public static final double kTurnMaxSpeedRPS = 4*Math.PI;
         public static final int kDriveJoystickPort = 0;
-        public static final int kDriveXAxis = 1;
-        public static final int kDriveYAxis = 0;
+        public static final int kDriveXAxis = 0;
+        public static final int kDriveYAxis = 1;
         public static final int kDriveWAxis = 2;
         public static final int kDriveFieldOrientButtonIdx = 1;
 

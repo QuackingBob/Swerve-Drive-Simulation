@@ -41,4 +41,8 @@ public class DriveSimulationData {
     public double getHeading() {
         return headingAngle;
     }
+
+    public void setHeading(double radians) {
+        headingAngle = radians;
+    }
 }
