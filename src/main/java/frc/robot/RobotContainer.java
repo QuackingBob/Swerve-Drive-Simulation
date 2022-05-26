@@ -57,6 +57,19 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     new JoystickButton(driveJoystick, 2).whenPressed(() -> swerveDrivetrain.zeroHeading());
+    new JoystickButton(driveJoystick, 5)
+      .whenPressed(() -> swerveDrivetrain.setRotationPointIdx(1))
+      .whenReleased(() -> swerveDrivetrain.setRotationPointIdx(0));
+    new JoystickButton(driveJoystick, 6)
+      .whenPressed(() -> swerveDrivetrain.setRotationPointIdx(2))
+      .whenReleased(() -> swerveDrivetrain.setRotationPointIdx(0));
+    new JoystickButton(driveJoystick, 7)
+      .whenPressed(() -> swerveDrivetrain.setRotationPointIdx(3))
+      .whenReleased(() -> swerveDrivetrain.setRotationPointIdx(0));
+    new JoystickButton(driveJoystick, 8)
+      .whenPressed(() -> swerveDrivetrain.setRotationPointIdx(4))
+      .whenReleased(() -> swerveDrivetrain.setRotationPointIdx(0));
+    
   }
 
   /**

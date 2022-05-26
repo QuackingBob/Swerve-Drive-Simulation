@@ -36,6 +36,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   private SwerveDriveKinematics swerveKinematics;
   private SwerveModuleState[] desiredStates = new SwerveModuleState[4];
   private SwerveModule[] motors;
+  private int rotationPoint = 0;
 
   // Auton Stuff
   private Pose2d pose;
@@ -268,5 +269,13 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   public Field2d getField() {
     return field;
+  }
+
+  public int getRotationPointIdx() {
+    return rotationPoint;
+  }
+
+  public void setRotationPointIdx(int idx) {
+    rotationPoint = idx;
   }
 }
