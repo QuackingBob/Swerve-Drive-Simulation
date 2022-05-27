@@ -37,7 +37,9 @@ public class SwerveJoystickCommand extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    drivetrain.setJoystick();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -60,7 +62,7 @@ public class SwerveJoystickCommand extends CommandBase {
     ChassisSpeeds chassisSpeeds;
     if (fieldOrientedFunc.get()) {
       chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        vX, vY, vW, drivetrain.getRotation2d());
+        vY, vX, vW, drivetrain.getSimRotation2d());
     }
     else {
       chassisSpeeds = new ChassisSpeeds(vX, vY, vW);
@@ -80,6 +82,7 @@ public class SwerveJoystickCommand extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     drivetrain.stopModules();
+    drivetrain.setDisabled();
   }
 
   // Returns true when the command should end.

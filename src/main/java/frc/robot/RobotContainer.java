@@ -16,6 +16,9 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.commands.AutonPathExample;
 import frc.robot.commands.SwerveJoystickCommand;
 import frc.robot.subsystems.SwerveDrivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,6 +39,7 @@ public class RobotContainer {
 
   private final Joystick driveJoystick = new Joystick(Constants.SwerveDrivetrain.kDriveJoystickPort);
 
+  private final SendableChooser<Command> autonSelector = new SendableChooser<>();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     swerveDrivetrain.setDefaultCommand(new SwerveJoystickCommand(
@@ -43,7 +47,7 @@ public class RobotContainer {
       () -> -driveJoystick.getRawAxis(Constants.SwerveDrivetrain.kDriveXAxis), 
       () -> -driveJoystick.getRawAxis(Constants.SwerveDrivetrain.kDriveYAxis), 
       () -> -driveJoystick.getRawAxis(Constants.SwerveDrivetrain.kDriveWAxis), 
-      () -> !driveJoystick.getRawButton(Constants.SwerveDrivetrain.kDriveFieldOrientButtonIdx)));
+      () -> driveJoystick.getRawButton(Constants.SwerveDrivetrain.kDriveFieldOrientButtonIdx)));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -70,6 +74,8 @@ public class RobotContainer {
       .whenPressed(() -> swerveDrivetrain.setRotationPointIdx(4))
       .whenReleased(() -> swerveDrivetrain.setRotationPointIdx(0));
     
+    autonSelector.setDefaultOption("Example", new AutonPathExample(swerveDrivetrain));
+    SmartDashboard.putData("Auton Selector", autonSelector);
   }
 
   /**
@@ -78,36 +84,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
-      Constants.SwerveDrivetrain.kDriveMaxSpeedMPS, 
-      Constants.SwerveDrivetrain.kDriveMaxAcceleration);
-    trajectoryConfig.setKinematics(swerveDrivetrain.getKinematics());
-
-    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-      new Pose2d(0, 0, new Rotation2d(0)),
-      List.of(
-        new Translation2d(1, 2),
-        new Translation2d(3, 1)
-      ), 
-      new Pose2d(4, 2, Rotation2d.fromDegrees(180.0)),
-      trajectoryConfig);
-    
-    swerveDrivetrain.getField().getObject("traj").setTrajectory(trajectory);
-
-    SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-      trajectory, 
-      swerveDrivetrain::getSimPose, 
-      swerveDrivetrain.getKinematics(), 
-      swerveDrivetrain.xController, 
-      swerveDrivetrain.yController, 
-      swerveDrivetrain.thetaController, 
-      swerveDrivetrain::setModuleStates,
-      swerveDrivetrain);
-    
-    return new SequentialCommandGroup(
-      new InstantCommand(() -> swerveDrivetrain.resetSimOdometry(trajectory.getInitialPose())),
-      swerveControllerCommand,
-      new InstantCommand(() -> swerveDrivetrain.stopModules())
-    );
+    return autonSelector.getSelected();
   }
 }

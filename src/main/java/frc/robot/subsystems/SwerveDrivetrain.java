@@ -8,7 +8,6 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,18 +15,25 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.SwerveModule;
 
 public class SwerveDrivetrain extends SubsystemBase {
   // state stuff
   public static enum DrivetrainState {
-    AUTON_PATH, JOYSTICK_DRIVE
+    AUTON_PATH, JOYSTICK_DRIVE, DISABLED
   }
 
   private DrivetrainState state;
@@ -43,10 +49,10 @@ public class SwerveDrivetrain extends SubsystemBase {
   private SwerveDriveOdometry simOdometry;
   private SwerveDriveOdometry odometry;
   private Field2d field;
-  private SimpleMotorFeedforward feedforward;
   public PIDController xController;
   public PIDController yController;
   public ProfiledPIDController thetaController;
+  private TrajectoryConfig trajectoryConfig;
 
   // sensors
   private AHRS gyro;
@@ -136,6 +142,12 @@ public class SwerveDrivetrain extends SubsystemBase {
       Constants.SwerveDrivetrain.m_r_control_D, 
       Constants.SwerveDrivetrain.kThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    trajectoryConfig = new TrajectoryConfig(
+      Constants.SwerveDrivetrain.kDriveMaxSpeedMPS, 
+      Constants.SwerveDrivetrain.kDriveMaxAcceleration);
+    trajectoryConfig.setKinematics(swerveKinematics);
+    state = DrivetrainState.JOYSTICK_DRIVE;
   }
 
   public void zeroHeading() {
@@ -154,6 +166,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   public Rotation2d getRotation2d() {
     return Rotation2d.fromDegrees(getHeading());
+  }
+
+  public Rotation2d getSimRotation2d()  {
+    return new Rotation2d(simulationData.getHeading());
   }
 
   @Override
@@ -277,5 +293,30 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   public void setRotationPointIdx(int idx) {
     rotationPoint = idx;
+  }
+
+  public TrajectoryConfig getTrajectoryConfig() {
+    return trajectoryConfig;
+  }
+
+  public SequentialCommandGroup getDriveSimCommand(SwerveControllerCommand swerveCommand, Trajectory trajectory) {
+    Command swerveControllerCommand;
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> resetSimOdometry(trajectory.getInitialPose())),
+        swerveCommand,
+        new InstantCommand(() -> stopModules())
+    );
+  }
+
+  public void setAutonomous() {
+    state = DrivetrainState.AUTON_PATH;
+  }
+
+  public void setJoystick() {
+    state = DrivetrainState.JOYSTICK_DRIVE;
+  }
+
+  public void setDisabled() {
+    state = DrivetrainState.DISABLED;
   }
 }
