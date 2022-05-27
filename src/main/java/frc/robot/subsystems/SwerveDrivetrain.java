@@ -150,10 +150,17 @@ public class SwerveDrivetrain extends SubsystemBase {
     state = DrivetrainState.JOYSTICK_DRIVE;
   }
 
+  /**
+   * Zero the physical gyro
+   */
   public void zeroHeading() {
     gyro.reset();
   }
 
+  /**
+   * get the heading of the physical gyro
+   * @return heading angle in degrees
+   */
   public double getHeading() {
     return Math.IEEEremainder(gyro.getAngle(), 360);
     /**
@@ -164,14 +171,25 @@ public class SwerveDrivetrain extends SubsystemBase {
      */
   }
 
+  /**
+   * get the gyro angle as rotation2d
+   * @return Rotation2d heading
+   */
   public Rotation2d getRotation2d() {
     return Rotation2d.fromDegrees(getHeading());
   }
 
+  /**
+   * get the simulated heading of the robot as rotation2d
+   * @return Rotation2d simulated heading
+   */
   public Rotation2d getSimRotation2d()  {
     return new Rotation2d(simulationData.getHeading());
   }
 
+  /**
+   * update simulation, drive and smart dashboard data
+   */
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -185,6 +203,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     odometry.update(getRotation2d(), getOutputModuleStates());
 
+    // use Euler integration to estimate current heading from velocities, dt, and past states
     double currTime = Timer.getFPGATimestamp();
     double dt = currTime - time;
     time = currTime;
@@ -195,12 +214,19 @@ public class SwerveDrivetrain extends SubsystemBase {
     simulationData.update(desiredStates, anglePosSim);
   }
 
+  /**
+   * stop the swerve modules
+   */
   public void stopModules() {
     for (SwerveModule m : motors) {
       m.stop();
     }
   }
 
+  /**
+   * set the states of all four modules
+   * @param states
+   */
   public void setModuleStates(SwerveModuleState[] states) {
     SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.SwerveDrivetrain.kMaxSpeedMPS);
     for (int i = 0; i < motors.length; i++)
@@ -210,6 +236,13 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
   }
 
+  /**
+   * set the states of all four modules using speeds (horizontal, vertical and angular) as well as a rotation point
+   * @param v_forwardMps
+   * @param v_sideMps
+   * @param v_rot (rad/sec)
+   * @param rotatePoint
+   */
   public void setSpeeds(double v_forwardMps, double v_sideMps, double v_rot, Translation2d rotatePoint) {
     ChassisSpeeds speeds = new ChassisSpeeds(v_forwardMps, v_sideMps, v_rot);
     SwerveModuleState[] moduleStates = swerveKinematics.toSwerveModuleStates(speeds, rotatePoint);
@@ -219,10 +252,18 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
   }
 
+  /**
+   * get the swerve kinematics of the robot
+   * @return SwerveDriveKinematics kinematics
+   */
   public SwerveDriveKinematics getKinematics() {
     return swerveKinematics;
   }
 
+  /**
+   * get the linear velocity of the robot in mps
+   * @return linear velocity
+   */
   public Translation2d getLinearVelocity() {
     ChassisSpeeds speeds = swerveKinematics.toChassisSpeeds(
         motors[0].getState(),
@@ -236,6 +277,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     );
   }
 
+  /**
+   * get the rotational velocity of the robot in rad/sec
+   * @return rotational velocity
+   */
   public double getRotationalVelocity() {
     ChassisSpeeds speeds = swerveKinematics.toChassisSpeeds(
         motors[0].getState(),
@@ -246,6 +291,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     return speeds.omegaRadiansPerSecond;
   }
 
+  /**
+   * get the desired rotational velocity of the robot
+   * @return desired rotational velocity rad/sec
+   */
   public double getDesiredRotationalVelocity() {
     ChassisSpeeds speeds = swerveKinematics.toChassisSpeeds(
         motors[0].getDesiredState(),
@@ -256,6 +305,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     return speeds.omegaRadiansPerSecond;
   }
 
+  /**
+   * get the actual states of all swerve modules
+   * @return SwerveModuleState[] states
+   */
   public SwerveModuleState[] getOutputModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++)
@@ -265,40 +318,75 @@ public class SwerveDrivetrain extends SubsystemBase {
     return states;
   }
 
+  /**
+   * get the position of the robot
+   * @return Pose2d pose
+   */
   public Pose2d getPose() {
     return odometry.getPoseMeters();
   }
 
+  /**
+   * get the simulated position of the robot
+   * @return Pose2d pose
+   */
   public Pose2d getSimPose() {
     return simOdometry.getPoseMeters();
   }
 
+  /**
+   * reset the real odometry of the robot
+   * @param pose
+   */
   public void resetOdometry(Pose2d pose) {
     odometry.resetPosition(pose, getRotation2d());
   }
 
+  /**
+   * reset the simulated odometry of the robot
+   * @param pose
+   */
   public void resetSimOdometry(Pose2d pose) {
     simulationData.setHeading(pose.getRotation().getRadians());
     simOdometry.resetPosition(pose, new Rotation2d(simulationData.getHeading()));
     stopModules();
   }
 
+  /**
+   * get the field
+   * @return Field2d field
+   */
   public Field2d getField() {
     return field;
   }
 
+  /**
+   * get the index of the Translation2d array of rotation points for evasive maneuvers
+   * @return index
+   */
   public int getRotationPointIdx() {
     return rotationPoint;
   }
 
+  /**
+   * set the index of the Translation2d array of rotation points for evasive maneuvers
+   * @param idx
+   */
   public void setRotationPointIdx(int idx) {
     rotationPoint = idx;
   }
 
+  /**
+   * get the trajectory config of the robot for autonomous
+   * @return TrajactoryConfig trajectoryConfig
+   */
   public TrajectoryConfig getTrajectoryConfig() {
     return trajectoryConfig;
   }
 
+  /**
+   * convert a swerve command and trajectory to SequentialCommandGroup
+   */
   public SequentialCommandGroup getDriveSimCommand(SwerveControllerCommand swerveCommand, Trajectory trajectory) {
     Command swerveControllerCommand;
     return new SequentialCommandGroup(
@@ -308,14 +396,23 @@ public class SwerveDrivetrain extends SubsystemBase {
     );
   }
 
+  /**
+   * set state as autonomous
+   */
   public void setAutonomous() {
     state = DrivetrainState.AUTON_PATH;
   }
 
+  /**
+   * set state as joystick drive
+   */
   public void setJoystick() {
     state = DrivetrainState.JOYSTICK_DRIVE;
   }
 
+  /**
+   * set state as disabled
+   */
   public void setDisabled() {
     state = DrivetrainState.DISABLED;
   }

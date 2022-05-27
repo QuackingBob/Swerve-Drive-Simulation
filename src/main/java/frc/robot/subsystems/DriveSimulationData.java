@@ -12,7 +12,10 @@ import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/** Add your docs here. */
+/** Add your docs here. 
+ * This class maintains simulation and field data as well as heading angle
+ * 
+*/
 public class DriveSimulationData {
     // private AnalogGyro m_gyro = new AnalogGyro(2);
     // private AnalogGyroSim m_gyroSim = new AnalogGyroSim(m_gyro);
@@ -20,12 +23,22 @@ public class DriveSimulationData {
     private Field2d m_field2d;
     private double headingAngle;
 
+    /**
+     * Create a new SimulationData container
+     * @param odometry simulation odometry
+     * @param field2d
+     */
     public DriveSimulationData(SwerveDriveOdometry odometry, Field2d field2d) {
         this.m_odometry = odometry;
         this.m_field2d = field2d;
         headingAngle = 0;
     }
 
+    /**
+     * update the simulation odometry and heading with swerve module states and estimated angle (radians)
+     * @param moduleStates
+     * @param pW position radians
+     */
     public void update(SwerveModuleState[] moduleStates, double pW) {
         headingAngle = pW;
         headingAngle = Math.IEEEremainder(headingAngle, 2*Math.PI);
@@ -38,10 +51,18 @@ public class DriveSimulationData {
             new Rotation2d(headingAngle));
     }
 
+    /**
+     * Get the simulation heading
+     * @return heading in radians
+     */
     public double getHeading() {
         return headingAngle;
     }
 
+    /**
+     * Set the heading angle
+     * @param radians
+     */
     public void setHeading(double radians) {
         headingAngle = radians;
     }

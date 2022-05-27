@@ -57,6 +57,10 @@ public class SwerveModule {
     resetEncoders();
   }
   
+  /**
+   * Get the drive position of the module
+   * @return the position in meters
+   */
   public double getDrivePosition() {
     return MathUtils.ticksToMeter(
       driveMotor.getSelectedSensorPosition(), 
@@ -65,6 +69,10 @@ public class SwerveModule {
       Constants.SwerveModule.radius);
   }
 
+  /**
+   * Get the turn position for the module
+   * @return the position in radians
+   */
   public double getTurnPosition() {
     return MathUtils.ticksToRadians(
       turnMotor.getSelectedSensorPosition(),
@@ -72,6 +80,10 @@ public class SwerveModule {
       Constants.SwerveModule.gear_ratio_turn);
   }
 
+  /**
+   * Get the linear velocity of the module
+   * @return the linear velocity in mps
+   */
   public double getDriveVelocity() {
     return MathUtils.rpmToMPS(
       MathUtils.ticksToRPM(
@@ -81,6 +93,10 @@ public class SwerveModule {
       Constants.SwerveModule.radius);
   }
 
+  /**
+   * Get the angular velocity of the module
+   * @return the angular velocity in rpm
+   */
   public double getTurnVelocity() {
     return MathUtils.ticksToRPM(
       turnMotor.getSelectedSensorVelocity(),
@@ -88,6 +104,10 @@ public class SwerveModule {
       Constants.SwerveModule.gear_ratio_drive);
   }
 
+  /**
+   * Get the angle of the absolute encoder sensor on the module
+   * @return the absolute encoder angle in radians
+   */
   public double getAbsoluteEncoderRad() {
     double angle = absEncoder.getVoltage() / RobotController.getVoltage5V();
     angle *= 2.0 * Math.PI;
@@ -95,6 +115,10 @@ public class SwerveModule {
     return angle * (absEncoderReversed? -1.0 : 1.0);
   }
 
+  /**
+   * reset the encoders of the module
+   * calibrate turn motor using abs encoder value
+   */
   public void resetEncoders() {
     driveMotor.setSelectedSensorPosition(0);
     turnMotor.setSelectedSensorPosition(
@@ -103,6 +127,10 @@ public class SwerveModule {
         Constants.SwerveModule.gear_ratio_turn));
   }
 
+  /**
+   * set the angle of the turn motor
+   * @param radians
+   */
   public void setAngle(double radians)
   {
       turnMotor.set(
@@ -113,19 +141,35 @@ public class SwerveModule {
           Constants.SwerveModule.gear_ratio_turn));
   }
 
+  /**
+   * set the velocity of the drive motor
+   * @param v_mps
+   */
   public void setVelocity(double v_mps)
   {
       driveMotor.set(ControlMode.Velocity, MathUtils.mpsToRPM(v_mps, Constants.SwerveModule.radius));
   }
 
+  /**
+   * get the swerve module state (with velocity and rotation)
+   * @return SwerveModuleState
+   */
   public SwerveModuleState getState() {
     return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getTurnPosition()));
   }
 
+  /**
+   * get the desired state of the module
+   * @return SwerveModuleState
+   */
   public SwerveModuleState getDesiredState() {
     return desiredState;
   }
 
+  /**
+   * set the desired state of the module
+   * @param state
+   */
   public void setDesiredState(SwerveModuleState state) {
     if (Math.abs(state.speedMetersPerSecond) < 0.001)
     {
@@ -139,12 +183,19 @@ public class SwerveModule {
     SmartDashboard.putString("Swerve [" + absEncoder.getChannel() + "] state", state.toString());
   }
 
+  /**
+   * stop the module from running
+   */
   public void stop() {
     driveMotor.set(ControlMode.PercentOutput, 0);
     turnMotor.set(ControlMode.PercentOutput, 0);
     desiredState = new SwerveModuleState(0, desiredState.angle);
   }
 
+  /**
+   * get the swerve module name (useful for SmartDashboard)
+   * @return String name
+   */
   public String getName() {
     return "Swerve " + absEncoder.getChannel();
   }

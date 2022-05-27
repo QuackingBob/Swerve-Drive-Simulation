@@ -42,6 +42,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autonSelector = new SendableChooser<>();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // joystick drive config
     swerveDrivetrain.setDefaultCommand(new SwerveJoystickCommand(
       swerveDrivetrain, 
       () -> -driveJoystick.getRawAxis(Constants.SwerveDrivetrain.kDriveXAxis), 
@@ -60,7 +61,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    // button to zero the heading
     new JoystickButton(driveJoystick, 2).whenPressed(() -> swerveDrivetrain.zeroHeading());
+    // buttons to change the rotation point for evasive maneuvers 
     new JoystickButton(driveJoystick, 5)
       .whenPressed(() -> swerveDrivetrain.setRotationPointIdx(1))
       .whenReleased(() -> swerveDrivetrain.setRotationPointIdx(0));
